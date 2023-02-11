@@ -34,10 +34,10 @@ class HBNBCommand(cmd.Cmd):
             cmd_args = match.group(3).strip('"')
             print(cmd_args)
 
-            if class_name in HBNBCommand.class_map and
-            cmd_method in map_method:
-                command = cmd_method + " " + class_name + " " + cmd_args
-                self.onecmd(command)
+            if (class_name in HBNBCommand.class_map):
+                if (cmd_method in map_method):
+                    command = cmd_method + " " + class_name + " " + cmd_args
+                    self.onecmd(command)
         return False
 
     def do_create(self, name):
