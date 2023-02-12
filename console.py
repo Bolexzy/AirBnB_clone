@@ -39,30 +39,30 @@ class HBNBCommand(cmd.Cmd):
             class_name = match.group(1)
             cmd_method = match.group(2)
             cmd_args = match.group(3)
-            attr = re.search('^"([^"]*)"(?:, (.*))?$', cmd_args)
+            match_attr = re.search('^"([^"]*)"(?:, (.*))?$', cmd_args)
             uid = cmd_args.strip('"')
 
             if (class_name in HBNBCommand.class_map):
                 if (cmd_method in map_method):
                     command = cmd_method + " " + class_name + " "
                     if cmd_method == 'update':
-                        if attr and len(attr.groups()) == 2:
-                            uid = attr.group(1)
-                            attr = attr.group(2)
+                        if match_attr and len(match_attr.groups()) > 0:
+                            uid = match_attr.group(1)
+                            attr = match_attr.group(2)
                             match_dict = re.search('^({.*})$', attr)
-                            match_attr_args = re.search(
-                                    '^(?:"([^"]*)")?(?:, (.*))?$', attr)
+                            match_attr_value = re.search(
+                                '^(?:"([^"]*)")?(?:, (.*))?$', attr)
 
                             if match_dict:
                                 self.do_update_dict(class_name,
                                                     uid, match_dict.group(1))
                                 command = ""
                                 return ""
-                            elif match_attr_args \
-                                    and len(match_attr_args.groups()) > 1:
-                                attr_and_value = match_attr_args.group(
-                                        1) or "" + " " + match_attr_args.group(
-                                                2) or ""
+                            elif match_attr_value \
+                                    and len(match_attr_value.groups()) > 1:
+                                attr_name = (match_attr_value.group(1) or "")
+                                attr_value = (match_attr_value.group(2) or "")
+                                attr_and_value = attr_name + " " + attr_value
                         command += uid + " " + attr_and_value
                     else:
                         command += uid
