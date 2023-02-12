@@ -46,7 +46,7 @@ class HBNBCommand(cmd.Cmd):
                 if (cmd_method in map_method):
                     command = cmd_method + " " + class_name + " "
                     if cmd_method == 'update':
-                        if len(attr.groups()) == 2:
+                        if attr and len(attr.groups()) == 2:
                             uid = attr.group(1)
                             attr = attr.group(2)
                             match_dict = re.search('^({.*})$', attr)
@@ -61,7 +61,8 @@ class HBNBCommand(cmd.Cmd):
                             elif match_attr_args \
                                     and len(match_attr_args.groups()) > 1:
                                 attr_and_value = match_attr_args.group(
-                                        1) + " " + match_attr_args.group(2)
+                                        1) or "" + " " + match_attr_args.group(
+                                                2) or ""
                         command += uid + " " + attr_and_value
                     else:
                         command += uid
@@ -84,6 +85,7 @@ class HBNBCommand(cmd.Cmd):
             storage.new(obj)
             print("{}".format(obj.id))
             obj.save()
+
     def do_show(self, line):
         """Usage: show <class_name> <id>
         Prints the string representation of a class instance of a given id.
@@ -164,38 +166,39 @@ class HBNBCommand(cmd.Cmd):
         """
         obj_dict = storage.all()
 
-        reg = r'(\w+) (\w+-\w+-\w+-\w+-\w+) (\w+) ((?:"[^"]*")|(?:\S+))?'
-        match = re.findall(reg, line)
+        reg = r'(\w+)(?:\s(\S+)(?:\s(\w+)(?:\s((?:"[^"]*")|(?:(\S)+)))?)?)?'
+        match = re.search(reg, line)
 
-        args = list(match[0])
+        if match:
+            class_name = match.group(1)
+            uid = match.group(2)
+            attr = match.group(3)
+            value = match.group(4)
 
-        if not line:
+        if not line or not match:
             print("** class name missing **")
-        elif len(args) > 0:
-            if args[0] not in HBNBCommand.class_map:
-                print("** class doesn't exist **")
-                print(args)
-            elif len(args) == 1:
-                print("** instance id missing **")
+        elif class_name not in HBNBCommand.class_map:
+            print("** class doesn't exist **")
+        elif uid is None:
+            print("** instance id missing **")
+        else:
+            key = "{}.{}".format(class_name, uid.strip('"'))
+            if key not in obj_dict:
+                print("** no instance found **")
             else:
-                key = "{}.{}".format(args[0], args[1].strip('"'))
-                if key not in obj_dict:
-                    print("** no instance found **")
+                if not attr:
+                    print("** attribute name missing **")
+                elif not value:
+                    print("** value missing **")
                 else:
-                    if len(args) == 2:
-                        print("** attribute name missing **")
-                    elif len(args) == 3:
-                        print("** value missing **")
-                    else:
-                        attr = args[2]
-                        casttype = str
-                        try:
-                            casttype = type(ast.literal_eval(args[3]))
-                        except (ValueError, SyntaxError):
-                            pass
-                        args[3] = args[3].replace('"', '')
-                        setattr(storage.all()[key], attr, casttype(args[3]))
-                        storage.all()[key].save()
+                    casttype = str
+                    try:
+                        casttype = type(ast.literal_eval(value))
+                    except (ValueError, SyntaxError):
+                        pass
+                    value = value.replace('"', '')
+                    setattr(storage.all()[key], attr, casttype(value))
+                    storage.all()[key].save()
 
     def do_update_dict(self, class_name, uid, dict_attr):
         """Update method for attr, value pairs in a dict.
