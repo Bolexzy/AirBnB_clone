@@ -4,6 +4,8 @@
 """
 import cmd
 import re
+import ast
+import json
 from models.base_model import BaseModel
 from models.user import User
 from models.place import Place
@@ -25,18 +27,47 @@ class HBNBCommand(cmd.Cmd):
 
     def default(self, line):
         """Executes a user input that does not match other defined methods.
+        methods defined:
+            <class name>.show(<id>).
+            <class name>.destroy(<id>).
+            <class name>.update(<id>, <attribute name>, <attribute value>).
+
         """
         map_method = ['all', 'show', 'destroy', 'count', 'update']
         match = re.search(r'^(\w+)\.(\w+)(?:\(([^)]*)\))$', line)
         if match:
             class_name = match.group(1)
             cmd_method = match.group(2)
-            cmd_args = match.group(3).strip('"')
-            print(cmd_args)
+            cmd_args = match.group(3)
+            attr = re.search('^"([^"]*)"(?:, (.*))?$', cmd_args)
+            uid = cmd_args
 
             if (class_name in HBNBCommand.class_map):
                 if (cmd_method in map_method):
-                    command = cmd_method + " " + class_name + " " + cmd_args
+                    command = cmd_method + " " + class_name + " "
+                    if cmd_method == 'update':
+                        if len(attr.groups()) == 2:
+                            uid = attr.group(1)
+                            attr = attr.group(2)
+                            match_dict = re.search('^({.*})$', attr)
+                            match_attr_args = re.search(
+                                    '^(?:"([^"]*)")?(?:, (.*))?$', attr)
+
+                            if match_dict:
+                                self.do_update_dict(class_name,
+                                                    uid, match_dict.group(1))
+                                command = ""
+                                return ""
+                            elif match_attr_args \
+                                    and len(match_attr_args.groups()) > 1:
+                                attr_and_value = match_attr_args.group(
+                                        1) + " " + match_attr_args.group(2)
+                        command += uid + " " + attr_and_value
+                        print(command)
+
+                    else:
+                        command += uid
+                        print(command)
                     self.onecmd(command)
         return False
 
@@ -137,8 +168,11 @@ class HBNBCommand(cmd.Cmd):
         """
         obj_dict = storage.all()
 
-        match = re.findall(r'(\w+) (\w+-\w+-\w+-\w+-\w+) (\w+) "(.*?)"', line)
+        reg = r'(\w+) (\w+-\w+-\w+-\w+-\w+) (\w+) ((?:"[^"]*")|(?:\S+))?'
+        match = re.findall(reg, line)
+
         args = list(match[0])
+        print(args[3])
 
         if not line:
             print("** class name missing **")
@@ -152,7 +186,6 @@ class HBNBCommand(cmd.Cmd):
                 key = "{}.{}".format(args[0], args[1].strip('"'))
                 if key not in obj_dict:
                     print("** no instance found **")
-                    print(args)
                 else:
                     if len(args) == 2:
                         print("** attribute name missing **")
@@ -160,9 +193,36 @@ class HBNBCommand(cmd.Cmd):
                         print("** value missing **")
                     else:
                         attr = args[2]
-                        valtype = type(args[3])
-                        setattr(storage.all()[key], attr, valtype(args[3]))
+                        print(f"arg: {args}")
+                        casttype = str
+                        try:
+                            casttype = type(ast.literal_eval(args[3]))
+                        except (ValueError, SyntaxError):
+                            pass
+                        args[3] = args[3].replace('"', '')
+                        setattr(storage.all()[key], attr, casttype(args[3]))
                         storage.all()[key].save()
+
+    def do_update_dict(self, class_name, uid, dict_attr):
+        """Update method for attr, value pairs in a dict.
+        """
+        if uid is None:
+            print("** instance id missing **")
+
+        strip_dict = dict_attr.replace("'", '"')
+        d = json.loads(strip_dict)
+
+        key = "{}.{}".format(class_name, uid)
+
+        if key not in storage.all():
+            print("** no instance found **")
+
+        for k, v in d.items():
+            update_args = f'{class_name} {uid} {k} {v}'
+            print(update_args)
+            result = self.do_update(update_args)
+            if result is not None:
+                break
 
     def emptyline(self):
         """Do nothing upon receiving an empty line."""
