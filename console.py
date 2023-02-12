@@ -40,7 +40,7 @@ class HBNBCommand(cmd.Cmd):
             cmd_method = match.group(2)
             cmd_args = match.group(3)
             attr = re.search('^"([^"]*)"(?:, (.*))?$', cmd_args)
-            uid = cmd_args
+            uid = cmd_args.strip('"')
 
             if (class_name in HBNBCommand.class_map):
                 if (cmd_method in map_method):
@@ -63,11 +63,8 @@ class HBNBCommand(cmd.Cmd):
                                 attr_and_value = match_attr_args.group(
                                         1) + " " + match_attr_args.group(2)
                         command += uid + " " + attr_and_value
-                        print(command)
-
                     else:
                         command += uid
-                        print(command)
                     self.onecmd(command)
         return False
 
@@ -87,7 +84,6 @@ class HBNBCommand(cmd.Cmd):
             storage.new(obj)
             print("{}".format(obj.id))
             obj.save()
-
     def do_show(self, line):
         """Usage: show <class_name> <id>
         Prints the string representation of a class instance of a given id.
@@ -172,7 +168,6 @@ class HBNBCommand(cmd.Cmd):
         match = re.findall(reg, line)
 
         args = list(match[0])
-        print(args[3])
 
         if not line:
             print("** class name missing **")
@@ -193,7 +188,6 @@ class HBNBCommand(cmd.Cmd):
                         print("** value missing **")
                     else:
                         attr = args[2]
-                        print(f"arg: {args}")
                         casttype = str
                         try:
                             casttype = type(ast.literal_eval(args[3]))
@@ -219,7 +213,6 @@ class HBNBCommand(cmd.Cmd):
 
         for k, v in d.items():
             update_args = f'{class_name} {uid} {k} {v}'
-            print(update_args)
             result = self.do_update(update_args)
             if result is not None:
                 break
