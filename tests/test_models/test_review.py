@@ -9,6 +9,7 @@ from models import storage
 from models.engine.file_storage import FileStorage
 import os
 
+
 class TestReview(unittest.TestCase):
     """Test cases for the Review class.
     """
@@ -40,6 +41,7 @@ class TestReview(unittest.TestCase):
         self.assertTrue(hasattr(self.r, 'text'))
         for k, v in vars(self.r).items():
             self.assertTrue(hasattr(self.r, k))
+
 
 if __name__ == '__main__':
     unittest.main()

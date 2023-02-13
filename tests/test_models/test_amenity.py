@@ -4,10 +4,11 @@
 """
 import unittest
 from models.amenity import Amenity
-from models.base_model import BaseModel 
+from models.base_model import BaseModel
 from models import storage
 from models.engine.file_storage import FileStorage
 import os
+
 
 class TestAmenity(unittest.TestCase):
     """Test cases for the Amenity class.
@@ -23,7 +24,7 @@ class TestAmenity(unittest.TestCase):
         FileStorage._FileStorage__objects = {}
         if os.path.exists(FileStorage._FileStorage__file_path):
             os.remove(FileStorage._FileStorage__file_path)
-    
+
     def test_instantiation(self):
         """Tests for successful instantiation of the Amenity class.
         """
@@ -38,6 +39,7 @@ class TestAmenity(unittest.TestCase):
         self.assertTrue(hasattr(self.a, 'name'))
         for k, v in vars(self.a).items():
             self.assertTrue(hasattr(self.a, k))
+
 
 if __name__ == '__main__':
     unittest.main()

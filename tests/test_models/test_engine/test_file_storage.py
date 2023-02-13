@@ -9,6 +9,7 @@ from models.engine.file_storage import FileStorage
 import os
 import datetime
 
+
 class TestFileStorage(unittest.TestCase):
     """Test cases for the FileStorage class.
     """
@@ -42,7 +43,7 @@ class TestFileStorage(unittest.TestCase):
         FileStorage().new(b)
         key = f'{b.__class__.__name__}.{b.id}'
         self.assertEqual(FileStorage().all()[key], b)
-    
+
     def test_save(self):
         """Test public instance method save.
         verify if json file exists.
@@ -67,6 +68,7 @@ class TestFileStorage(unittest.TestCase):
             file_path = FileStorage.__file_path
         with self.assertRaises(AttributeError):
             file_obj = FileStorage.__objects
-            
+
+
 if __name__ == '__main__':
     unittest.main()

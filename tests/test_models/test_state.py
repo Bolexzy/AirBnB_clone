@@ -9,6 +9,7 @@ from models import storage
 from models.engine.file_storage import FileStorage
 import os
 
+
 class TestState(unittest.TestCase):
     """Test cases for the State class.
     """
@@ -38,6 +39,7 @@ class TestState(unittest.TestCase):
         self.assertTrue(hasattr(self.s, 'name'))
         for k, v in vars(self.s).items():
             self.assertTrue(hasattr(self.s, k))
+
 
 if __name__ == '__main__':
     unittest.main()
