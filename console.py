@@ -93,8 +93,7 @@ class HBNBCommand(cmd.Cmd):
             obj.save()
 
     def do_show(self, line):
-        """Usage: show <class_name> <id>
-        Prints the string representation of a class instance of a given id.
+        """Usage: show <class_name> <id> - prints instance info(str).
         """
         obj_dict = storage.all()
         if not line:

@@ -14,13 +14,17 @@ class TestConsole(unittest.TestCase):
     def test_help(self):
         with patch('sys.stdout', new=StringIO()) as f:
             HBNBCommand().onecmd("help show")
+        first_part = "Usage: show <class_name> <id> - prints"
+        second_part = "instance info(str)."
+        message = first_part + " " + second_part
         self.assertEqual(
-            "Usage: show <class_name> <id>\n        Prints the string representation of a class instance of a given id.".strip(),
+            message.strip(),
             f.getvalue().strip())
         with patch('sys.stdout', new=StringIO()) as f:
-            HBNBCommand().onecmd("help create")
+            HBNBCommand().onecmd("help quit")
         self.assertEqual(
-            "Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...\n        Create a new class instance with given keys/values and print its id.".strip(), f.getvalue().strip())
+            "Quit command to exit the program\n".strip(),
+            f.getvalue().strip())
 
     def test_create(self):
         with patch('sys.stdout', new=StringIO()) as f:
