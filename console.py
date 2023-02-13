@@ -39,8 +39,12 @@ class HBNBCommand(cmd.Cmd):
             class_name = match.group(1)
             cmd_method = match.group(2)
             cmd_args = match.group(3)
+            if cmd_args is None:
+                print("** instance id missing **")
+                return ""
             match_attr = re.search('^"([^"]*)"(?:, (.*))?$', cmd_args)
             uid = cmd_args.strip('"')
+            attr_and_value = ""
 
             if (class_name in HBNBCommand.class_map):
                 if (cmd_method in map_method):
@@ -49,6 +53,8 @@ class HBNBCommand(cmd.Cmd):
                         if match_attr and len(match_attr.groups()) > 0:
                             uid = match_attr.group(1)
                             attr = match_attr.group(2)
+                            if attr is None:
+                                attr = ""
                             match_dict = re.search('^({.*})$', attr)
                             match_attr_value = re.search(
                                 '^(?:"([^"]*)")?(?:, (.*))?$', attr)
@@ -74,7 +80,7 @@ class HBNBCommand(cmd.Cmd):
         Create a new class instance with given keys/values and print its id.
         """
         if not name:
-            print("*** class name missing **")
+            print("** class name missing **")
         elif name not in HBNBCommand.class_map:
             print("** class doesn't exist **")
         else:
@@ -230,7 +236,10 @@ class HBNBCommand(cmd.Cmd):
     def help_quit(self):
         print("Quit command to exit the program\n")
 
-    do_EOF = do_quit
+    def do_EOF(self, line):
+        print()
+        return True
+
     help_EOF = help_quit
 
 
